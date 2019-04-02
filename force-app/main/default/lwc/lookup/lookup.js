@@ -29,10 +29,19 @@ export default class Lookup extends LightningElement {
         findContacts({ "searchKey": this.searchKey} )
             .then(result => {
                 this.contacts = result;
+                this.toggleError();
             })
             .catch(error => {
                 this.error = error;
             });
+    }
+
+    toggleError() {
+        let searchInput = this.template.querySelector(".searchInput");
+        let message = !this.selectedContactId && this.searchKey && (this.contacts && this.contacts.length === 0) ? 
+            "No matching records found!" : "";
+        searchInput.setCustomValidity(message);
+        searchInput.reportValidity();
     }
 
     onResultClick(event) {
@@ -40,7 +49,6 @@ export default class Lookup extends LightningElement {
         this.searchKey = event.target.innerText;
         console.log("selectedContactId", this.selectedContactId);
         this.contacts = [];
-
     }
 
     get comboBoxClass() {
