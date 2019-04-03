@@ -3,6 +3,7 @@ import findContacts from '@salesforce/apex/LookupController.findContacts';
 
 /** The delay used when debouncing event handlers before invoking Apex. */
 const DELAY = 300;
+const DEBUG_MODE = false; // true;
 
 export default class Lookup extends LightningElement {
 
@@ -24,8 +25,34 @@ export default class Lookup extends LightningElement {
         }, DELAY);
     }
 
+    handleBlur(event) {
+        this.debug("before event.target.value", event.target.value, this.selectedContactId);
+
+        // copy the reference of properties locally to make them available for timeout
+        let searchKey = event.target.value;
+        let selectedContactId = this.selectedContactId;
+        let contacts = this.contacts;
+        // timeout is added to avoid showing error when user selects a result
+        setTimeout(() => {
+            if(this.searchKey) {
+                // when single records is available, select it
+                if(this.contacts && this.contacts.length === 1) {
+                    this.selectedContactId = contacts[0].Id;
+                    this.searchKey = contacts[0].Name;
+                    this.contacts = [];
+                }
+                // clear out contacts when user types a keyword, does not select any record and clicks away
+                if(!this.selectedContactId && this.searchKey) {
+                    this.contacts = [];
+                }
+                this.debug("inside blur timeout", this.searchKey, this.selectedContactId);
+                this.toggleError();
+            }
+        }, 200);
+    }
+
     handleLoad() {
-        console.log("you typed: " + this.searchKey);
+        this.debug("you typed: " + this.searchKey);
         findContacts({ "searchKey": this.searchKey} )
             .then(result => {
                 this.contacts = result;
@@ -38,7 +65,7 @@ export default class Lookup extends LightningElement {
 
     toggleError() {
         let searchInput = this.template.querySelector(".searchInput");
-        let message = !this.selectedContactId && this.searchKey && (this.contacts && this.contacts.length === 0) ? 
+        let message = !this.selectedContactId && this.searchKey && (this.contacts && this.contacts.length === 0) ?
             "No matching records found!" : "";
         searchInput.setCustomValidity(message);
         searchInput.reportValidity();
@@ -47,7 +74,7 @@ export default class Lookup extends LightningElement {
     onResultClick(event) {
         this.selectedContactId = event.currentTarget.dataset.contactId;
         this.searchKey = event.target.innerText;
-        console.log("selectedContactId", this.selectedContactId);
+        this.debug("selectedContactId", this.selectedContactId);
         this.contacts = [];
     }
 
@@ -60,7 +87,13 @@ export default class Lookup extends LightningElement {
         return this.searchKey && (this.contacts && this.contacts.length === 0);
     }
 
-    get showMessage() { 
+    get showMessage() {
         return this.selectedContactId && this.searchKey;
+    }
+
+    debug(message) {
+        if(DEBUG_MODE) {
+            console.log(message);
+        }
     }
 }
