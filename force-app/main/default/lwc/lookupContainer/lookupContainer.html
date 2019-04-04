@@ -2,13 +2,14 @@
     <lightning-card title="Form">
         <p class="slds-p-horizontal_small">
             <c-lookup onselected={contactSelected}
+                objectname={objectname}
                 autoselectsinglematchingrecord="true"></c-lookup>
         </p>
         <template if:true={searchKey}>
             <div class="slds-p-horizontal_small slds-p-top_small">
-                You selected contact {searchKey},
+                You selected record with name {searchKey},
                 <template if:true={contact}>
-                    with record Id as {contact.Id}
+                    Id as {contact.Id}
                 </template>
             </div>
         </template>

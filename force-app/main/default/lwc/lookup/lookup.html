@@ -3,8 +3,8 @@
         <div class={comboBoxClass} aria-expanded="false" aria-haspopup="listbox" role="combobox">
             <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
                 <lightning-input type="search" onchange={handleKeyChange} onblur={handleBlur}
-                    label="Search" class="searchInput"
-                    value={searchKey} placeholder="Search Account"></lightning-input>
+                    label={searchLabel} class="searchInput"
+                    value={searchKey} placeholder={placeholderLabel}></lightning-input>
             </div>
             <template if:true={contacts} >
                 <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">

@@ -1,5 +1,6 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api, wire } from 'lwc';
 import findContacts from '@salesforce/apex/LookupController.findContacts';
+import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 
 /** The delay used when debouncing event handlers before invoking Apex. */
 const DELAY = 300;
@@ -8,7 +9,7 @@ const debugmode = false;
 export default class Lookup extends LightningElement {
 
     // attributes
-    @api objectName;
+    @api objectname;
     @api fieldApiName;
     @api autoselectsinglematchingrecord = false;
 
@@ -17,6 +18,25 @@ export default class Lookup extends LightningElement {
     @track contacts;
     @track error;
     @track selectedContactId;
+    objectInformation;
+
+    @track placeholderLabel = "Search";
+    @track searchLabel;
+
+    @wire(getObjectInfo, { objectApiName: "$objectname" })
+    handleResult({error, data}) {
+        if(data && !this.objectInformation) {
+            this.objectInformation = data;
+            console.log("this.objectInformation", JSON.stringify(this.objectInformation));
+
+            this.placeholderLabel += " " + (this.objectInformation && this.objectInformation.labelPlural ?
+                this.objectInformation.labelPlural : '');
+            this.searchLabel = this.objectInformation.label;
+            console.log("Labels retrieved..");
+        } else {
+            console.log("error", JSON.stringify(error));
+        }
+    }
 
     handleKeyChange(event) {
         this.setContactId("");
@@ -71,7 +91,7 @@ export default class Lookup extends LightningElement {
     toggleError() {
         let searchInput = this.template.querySelector(".searchInput");
         let message = !this.selectedContactId && this.searchKey && (this.contacts && this.contacts.length === 0) ?
-            "No matching records found!" : "";
+            "An invalid option has been chosen." : "";
         searchInput.setCustomValidity(message);
         searchInput.reportValidity();
     }

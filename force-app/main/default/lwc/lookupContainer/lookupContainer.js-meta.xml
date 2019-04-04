@@ -7,4 +7,12 @@
         <target>lightning__RecordPage</target>
         <target>lightning__HomePage</target>
     </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <property name="objectname" type="String" label="Object Name"
+                description="Enter object API name"
+                placeholder="Enter object API name"
+                required="true"/>
+        </targetConfig>
+    </targetConfigs>
 </LightningComponentBundle>
