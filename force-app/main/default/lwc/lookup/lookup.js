@@ -1,20 +1,25 @@
-import { LightningElement, track, api, wire } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 import findContacts from '@salesforce/apex/LookupController.findContacts';
 
 /** The delay used when debouncing event handlers before invoking Apex. */
 const DELAY = 300;
-const DEBUG_MODE = false; // true;
+const debugmode = false;
 
 export default class Lookup extends LightningElement {
 
-    @track searchKey = '';
+    // attributes
+    @api objectName;
+    @api fieldApiName;
+    @api autoselectsinglematchingrecord = false;
 
+    // reactive private properties
+    @track searchKey = '';
     @track contacts;
     @track error;
     @track selectedContactId;
 
     handleKeyChange(event) {
-        this.selectedContactId ="";
+        this.setContactId("");
         // Debouncing this method: Do not update the reactive property as long as this function is
         // being called within a delay of DELAY. This is to avoid a very large number of Apex method calls.
         window.clearTimeout(this.delayTimeout);
@@ -36,8 +41,8 @@ export default class Lookup extends LightningElement {
         setTimeout(() => {
             if(this.searchKey) {
                 // when single records is available, select it
-                if(this.contacts && this.contacts.length === 1) {
-                    this.selectedContactId = contacts[0].Id;
+                if(this.autoselectsinglematchingrecord && this.contacts && this.contacts.length === 1) {
+                    this.setContactId(contacts[0].Id);
                     this.searchKey = contacts[0].Name;
                     this.contacts = [];
                 }
@@ -72,10 +77,26 @@ export default class Lookup extends LightningElement {
     }
 
     onResultClick(event) {
-        this.selectedContactId = event.currentTarget.dataset.contactId;
+        this.setContactId(event.currentTarget.dataset.contactId);
         this.searchKey = event.target.innerText;
         this.debug("selectedContactId", this.selectedContactId);
         this.contacts = [];
+    }
+
+    setContactId(contactId) {
+        if(this.selectedContactId !== contactId) {
+            this.selectedContactId = contactId;
+
+            let contact = {};
+            if(this.contacts) {
+                contact = this.contacts.find(contact => contact.Id === contactId) || {};
+            }
+            const searchKeyword = this.selectedContactId ? contact.Name : "";
+            const eventData = {"detail": { "contact": contact, "searchKey": searchKeyword }};
+            const selectedEvent = new CustomEvent('selected', eventData);
+            this.debug("sending event", JSON.stringify(eventData));
+            this.dispatchEvent(selectedEvent);
+        }
     }
 
     get comboBoxClass() {
@@ -92,7 +113,7 @@ export default class Lookup extends LightningElement {
     }
 
     debug(message) {
-        if(DEBUG_MODE) {
+        if(this.debugmode === true) {
             console.log(message);
         }
     }
