@@ -1,0 +1,5 @@
+**/jsconfig.json
+
+**/.eslintrc.json
+.sfdx/*
+.vscode/*
