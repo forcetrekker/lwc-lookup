@@ -125,6 +125,15 @@ export default class Lookup extends LightningElement {
         return "slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click " + className;
     }
 
+    get iconColor() {
+        let color = "background-color: " + 
+            (this.themeInfo && this.themeInfo.color ? 
+                ("#" + this.themeInfo.color) : "") + 
+            ";";
+        console.log("color", color);
+        return color;
+    }
+
     get noRecordFound() {
         return this.searchKey && (this.contacts && this.contacts.length === 0);
     }
