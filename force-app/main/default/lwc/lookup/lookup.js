@@ -18,23 +18,24 @@ export default class Lookup extends LightningElement {
     @track contacts;
     @track error;
     @track selectedContactId;
-    objectInformation;
 
     @track placeholderLabel = "Search";
     @track searchLabel;
+    @track themeInfo;
 
     @wire(getObjectInfo, { objectApiName: "$objectname" })
     handleResult({error, data}) {
         if(data && !this.objectInformation) {
-            this.objectInformation = data;
-            console.log("this.objectInformation", JSON.stringify(this.objectInformation));
+            let objectInformation = data;
+            this.debug("objectInformation", JSON.stringify(objectInformation));
 
-            this.placeholderLabel += " " + (this.objectInformation && this.objectInformation.labelPlural ?
-                this.objectInformation.labelPlural : '');
-            this.searchLabel = this.objectInformation.label;
-            console.log("Labels retrieved..");
+            this.placeholderLabel += " " + (objectInformation && objectInformation.labelPlural ?
+                objectInformation.labelPlural : '');
+            this.searchLabel = objectInformation.label;
+            this.themeInfo = objectInformation.themeInfo || {};
+            this.debug("Labels retrieved..");
         } else {
-            console.log("error", JSON.stringify(error));
+            this.debug("error", JSON.stringify(error));
         }
     }
 
