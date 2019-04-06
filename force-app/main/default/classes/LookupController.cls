@@ -8,7 +8,7 @@ public with sharing class LookupController {
             return contacts;
         }
         String key = '%' + searchKey + '%';
-        contacts = [SELECT Id, Name, Title, Phone, Email FROM Contact WHERE Name LIKE :key LIMIT 10];
+        contacts = [SELECT Id, Name, Title, Phone, Email FROM Contact WHERE Name LIKE :key ORDER BY Name LIMIT 10];
         System.debug('contacts: ' + contacts);
         return contacts;
     }
