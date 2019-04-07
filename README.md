@@ -14,4 +14,4 @@ This is a generic lookup component implemented on **lightning web components**.
 
 ## Lookup in action
 
-![alt text](https://github.com/rahuls91221/lwc-lookup/blob/develop/resources/gifs/example07042019.gif "Working Example")
+![Working Example](/resources/gifs/example0704.gif "Working Example")
