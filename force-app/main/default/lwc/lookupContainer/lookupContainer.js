@@ -1,7 +1,9 @@
 import { LightningElement, track, api } from 'lwc';
 
 export default class LookupContainer extends LightningElement {
+    @api cardTitle;
     @api objectname;
+    @api keyfieldapiname;
     @track contact;
     @track searchKey;
     contactSelected(event) {

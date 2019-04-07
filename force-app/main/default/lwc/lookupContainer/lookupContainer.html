@@ -1,9 +1,10 @@
 <template>
-    <lightning-card title="Form">
+    <lightning-card title={cardTitle}>
         <p class="slds-p-horizontal_small">
             <c-lookup onselected={contactSelected}
                 objectname={objectname}
-                autoselectsinglematchingrecord="true"></c-lookup>
+                autoselectsinglematchingrecord="true"
+                keyfieldapiname={keyfieldapiname}></c-lookup>
         </p>
         <template if:true={searchKey}>
             <div class="slds-p-horizontal_small slds-p-top_small">

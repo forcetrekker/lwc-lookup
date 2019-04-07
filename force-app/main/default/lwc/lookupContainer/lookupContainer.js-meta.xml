@@ -9,10 +9,20 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
+            <property name="cardTitle" type="String" label="Card Title"
+                description="Enter card title"
+                placeholder="Enter card title"
+                required="true"
+                default="Lookup Example"/>
             <property name="objectname" type="String" label="Object Name"
                 description="Enter object API name"
                 placeholder="Enter object API name"
                 required="true"/>
+            <property name="keyfieldapiname" type="String" label="Field Api Name"
+                description="Enter Field API name"
+                placeholder="Enter Field API name"
+                required="true"
+                default="Name"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
