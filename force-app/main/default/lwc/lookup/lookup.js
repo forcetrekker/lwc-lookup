@@ -112,6 +112,7 @@ export default class Lookup extends LightningElement {
         this.searchKey = event.target.innerText;
         this.debug("selectedContactId", this.selectedContactId);
         this.contacts = [];
+        this.template.querySelector(".searchInput").focus();
     }
 
     setContactId(contactId) {
@@ -120,7 +121,7 @@ export default class Lookup extends LightningElement {
 
             let contact = {};
             if(this.contacts) {
-                contact = this.contacts.find(contact => contact.Id === contactId) || {};
+                contact = this.contacts.find(c => c.Id === contactId) || {};
             }
             const searchKeyword = this.selectedContactId ? contact.Name : "";
             const eventData = {"detail": { "contact": contact, "searchKey": searchKeyword }};
