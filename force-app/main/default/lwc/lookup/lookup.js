@@ -10,7 +10,7 @@ export default class Lookup extends LightningElement {
 
     // attributes
     @api objectname;
-    @api fieldApiName;
+    @api keyfieldapiname;
     @api autoselectsinglematchingrecord = false;
 
     // reactive private properties
@@ -47,7 +47,7 @@ export default class Lookup extends LightningElement {
         const searchKey = event.target.value;
         this.delayTimeout = setTimeout(() => {
             this.searchKey = searchKey;
-            this.handleLoad();
+            this.queryRecords();
         }, DELAY);
     }
 
@@ -77,11 +77,21 @@ export default class Lookup extends LightningElement {
         }, 200);
     }
 
-    handleLoad() {
+    queryRecords() {
         this.debug("you typed: " + this.searchKey);
-        findContacts({ "searchKey": this.searchKey} )
+        findContacts({ "searchKey": this.searchKey, 
+            "objectApiName": this.objectname,
+            "keyField": this.keyfieldapiname} )
             .then(result => {
-                this.contacts = result;
+                let keyfieldapiname = this.keyfieldapiname;
+                this.debug("this.keyfieldapiname", keyfieldapiname);
+                let contacts = [];
+                result.forEach(function(eachResult) {
+                    contacts.push({ "Id": eachResult.Id, "Name": eachResult[keyfieldapiname] });
+                });
+                this.contacts = contacts;
+                this.debug("this.contacts", JSON.stringify(this.contacts));
+
                 this.toggleError();
             })
             .catch(error => {
@@ -130,7 +140,7 @@ export default class Lookup extends LightningElement {
             (this.themeInfo && this.themeInfo.color ? 
                 ("#" + this.themeInfo.color) : "") + 
             ";";
-        console.log("color", color);
+        this.debug("color", color);
         return color;
     }
 
