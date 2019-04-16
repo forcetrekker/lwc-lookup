@@ -12,30 +12,67 @@ export default class Lookup extends LightningElement {
     @api objectname;
     @api keyfieldapiname;
     @api autoselectsinglematchingrecord = false;
+    @api lookupLabel;
+    @api lookupPlaceholder;
+    @api invalidOptionChosenMessage;
 
     // reactive private properties
     @track searchKey = '';
     @track contacts;
     @track error;
     @track selectedContactId;
-
+    @track disabledInput;
     @track placeholderLabel = "Search";
     @track searchLabel;
     @track themeInfo;
 
     @wire(getObjectInfo, { objectApiName: "$objectname" })
     handleResult({error, data}) {
-        if(data && !this.objectInformation) {
-            let objectInformation = data;
-            this.debug("objectInformation", JSON.stringify(objectInformation));
+        if(data) {
 
-            this.placeholderLabel += " " + (objectInformation && objectInformation.labelPlural ?
-                objectInformation.labelPlural : '');
-            this.searchLabel = objectInformation.label;
+
+            let objectInformation = data;
+            // console.log("objectInformation", JSON.stringify(objectInformation));
+
+            if(this.lookupPlaceholder) {
+                this.placeholderLabel = this.lookupPlaceholder;
+            } else {
+                this.placeholderLabel += " " + (objectInformation && objectInformation.labelPlural ?
+                    objectInformation.labelPlural : '');
+            }
+            this.searchLabel = this.lookupLabel || objectInformation.label;
             this.themeInfo = objectInformation.themeInfo || {};
             this.debug("Labels retrieved..");
-        } else {
-            this.debug("error", JSON.stringify(error));
+
+            this.validateAttributes(objectInformation);
+        }
+        if(error) {
+            this.showError("You do not have the rights to object or object api name is invalid: " + this.objectname);
+            this.disabledInput = true;
+            // console.log("error", JSON.stringify(error));
+        }
+    }
+
+    validateAttributes(objectInformation) {
+        let fields = objectInformation.fields;
+
+        let fieldName, nameField;
+        let keyfieldapiname = this.keyfieldapiname;
+        Object.keys(fields).forEach(function(key, index) {
+            let field = fields[key];
+            if(keyfieldapiname && key && keyfieldapiname.toLowerCase() === key.toLowerCase()) {
+                fieldName = key;
+            }
+            if(field.nameField) {
+                nameField = key;
+            }
+        });
+        if(fieldName && fieldName !== this.keyfieldapiname) {
+            this.keyfieldapiname = fieldName;
+        }
+        if(!fieldName && nameField) {
+            this.disabledInput = true;
+            this.showError("Invalid field api name is passed - " + this.keyfieldapiname);
         }
     }
 
@@ -79,7 +116,7 @@ export default class Lookup extends LightningElement {
 
     queryRecords() {
         this.debug("you typed: " + this.searchKey);
-        findContacts({ "searchKey": this.searchKey, 
+        findContacts({ "searchKey": this.searchKey,
             "objectApiName": this.objectname,
             "keyField": this.keyfieldapiname} )
             .then(result => {
@@ -100,9 +137,13 @@ export default class Lookup extends LightningElement {
     }
 
     toggleError() {
-        let searchInput = this.template.querySelector(".searchInput");
         let message = !this.selectedContactId && this.searchKey && (this.contacts && this.contacts.length === 0) ?
-            "An invalid option has been chosen." : "";
+        (this.invalidOptionChosenMessage || "An invalid option has been chosen.") : "";
+        this.showError(message);
+    }
+
+    showError(message) {
+        let searchInput = this.template.querySelector(".searchInput");
         searchInput.setCustomValidity(message);
         searchInput.reportValidity();
     }
@@ -137,9 +178,9 @@ export default class Lookup extends LightningElement {
     }
 
     get iconColor() {
-        let color = "background-color: " + 
-            (this.themeInfo && this.themeInfo.color ? 
-                ("#" + this.themeInfo.color) : "") + 
+        let color = "background-color: " +
+            (this.themeInfo && this.themeInfo.color ?
+                ("#" + this.themeInfo.color) : "") +
             ";";
         this.debug("color", color);
         return color;

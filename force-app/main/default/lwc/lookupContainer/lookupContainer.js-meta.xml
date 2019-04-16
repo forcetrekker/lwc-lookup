@@ -23,6 +23,14 @@
                 placeholder="Enter Field API name"
                 required="true"
                 default="Name"/>
+            <property name="autoselectsinglematchingrecord" type="Boolean" label="Auto select single matching record"
+                description="Auto select single matching record"/>
+            <property name="lookupLabel" type="String" label="Field Lookup label"
+                description="Field Lookup label"
+                placeholder="Field Lookup label"/>
+            <property name="invalidOptionChosenMessage" type="String" label="Invalid option chosen message"
+                description="Invalid option chosen message"
+                placeholder="Invalid option chosen message"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

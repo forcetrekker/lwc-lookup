@@ -4,6 +4,9 @@ export default class LookupContainer extends LightningElement {
     @api cardTitle;
     @api objectname;
     @api keyfieldapiname;
+    @api autoselectsinglematchingrecord;
+    @api lookupLabel;
+    @api invalidOptionChosenMessage;
     @track contact;
     @track searchKey;
     contactSelected(event) {
