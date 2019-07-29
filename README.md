@@ -11,3 +11,7 @@ This is a generic lookup component implemented on **lightning web components**.
 5. [x] Make object, API name and placeholder labels dynamic.
 6. [ ] Add `CRUD` and `FLS` check.
 7. [ ] Add object icon for lookup results.
+
+## Lookup in action
+
+![Working Example](/resources/gifs/example0704.gif "Working Example")

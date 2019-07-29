@@ -10,31 +10,69 @@ export default class Lookup extends LightningElement {
 
     // attributes
     @api objectname;
-    @api fieldApiName;
+    @api keyfieldapiname;
     @api autoselectsinglematchingrecord = false;
+    @api lookupLabel;
+    @api lookupPlaceholder;
+    @api invalidOptionChosenMessage;
 
     // reactive private properties
     @track searchKey = '';
     @track contacts;
     @track error;
     @track selectedContactId;
-    objectInformation;
-
+    @track disabledInput;
     @track placeholderLabel = "Search";
     @track searchLabel;
+    @track themeInfo;
 
     @wire(getObjectInfo, { objectApiName: "$objectname" })
     handleResult({error, data}) {
-        if(data && !this.objectInformation) {
-            this.objectInformation = data;
-            console.log("this.objectInformation", JSON.stringify(this.objectInformation));
+        if(data) {
 
-            this.placeholderLabel += " " + (this.objectInformation && this.objectInformation.labelPlural ?
-                this.objectInformation.labelPlural : '');
-            this.searchLabel = this.objectInformation.label;
-            console.log("Labels retrieved..");
-        } else {
-            console.log("error", JSON.stringify(error));
+
+            let objectInformation = data;
+            // console.log("objectInformation", JSON.stringify(objectInformation));
+
+            if(this.lookupPlaceholder) {
+                this.placeholderLabel = this.lookupPlaceholder;
+            } else {
+                this.placeholderLabel += " " + (objectInformation && objectInformation.labelPlural ?
+                    objectInformation.labelPlural : '');
+            }
+            this.searchLabel = this.lookupLabel || objectInformation.label;
+            this.themeInfo = objectInformation.themeInfo || {};
+            this.debug("Labels retrieved..");
+
+            this.validateAttributes(objectInformation);
+        }
+        if(error) {
+            this.showError("You do not have the rights to object or object api name is invalid: " + this.objectname);
+            this.disabledInput = true;
+            // console.log("error", JSON.stringify(error));
+        }
+    }
+
+    validateAttributes(objectInformation) {
+        let fields = objectInformation.fields;
+
+        let fieldName, nameField;
+        let keyfieldapiname = this.keyfieldapiname;
+        Object.keys(fields).forEach(function(key, index) {
+            let field = fields[key];
+            if(keyfieldapiname && key && keyfieldapiname.toLowerCase() === key.toLowerCase()) {
+                fieldName = key;
+            }
+            if(field.nameField) {
+                nameField = key;
+            }
+        });
+        if(fieldName && fieldName !== this.keyfieldapiname) {
+            this.keyfieldapiname = fieldName;
+        }
+        if(!fieldName && nameField) {
+            this.disabledInput = true;
+            this.showError("Invalid field api name is passed - " + this.keyfieldapiname);
         }
     }
 
@@ -46,7 +84,7 @@ export default class Lookup extends LightningElement {
         const searchKey = event.target.value;
         this.delayTimeout = setTimeout(() => {
             this.searchKey = searchKey;
-            this.handleLoad();
+            this.queryRecords();
         }, DELAY);
     }
 
@@ -76,11 +114,21 @@ export default class Lookup extends LightningElement {
         }, 200);
     }
 
-    handleLoad() {
+    queryRecords() {
         this.debug("you typed: " + this.searchKey);
-        findContacts({ "searchKey": this.searchKey} )
+        findContacts({ "searchKey": this.searchKey,
+            "objectApiName": this.objectname,
+            "keyField": this.keyfieldapiname} )
             .then(result => {
-                this.contacts = result;
+                let keyfieldapiname = this.keyfieldapiname;
+                this.debug("this.keyfieldapiname", keyfieldapiname);
+                let contacts = [];
+                result.forEach(function(eachResult) {
+                    contacts.push({ "Id": eachResult.Id, "Name": eachResult[keyfieldapiname] });
+                });
+                this.contacts = contacts;
+                this.debug("this.contacts", JSON.stringify(this.contacts));
+
                 this.toggleError();
             })
             .catch(error => {
@@ -89,9 +137,13 @@ export default class Lookup extends LightningElement {
     }
 
     toggleError() {
-        let searchInput = this.template.querySelector(".searchInput");
         let message = !this.selectedContactId && this.searchKey && (this.contacts && this.contacts.length === 0) ?
-            "An invalid option has been chosen." : "";
+        (this.invalidOptionChosenMessage || "An invalid option has been chosen.") : "";
+        this.showError(message);
+    }
+
+    showError(message) {
+        let searchInput = this.template.querySelector(".searchInput");
         searchInput.setCustomValidity(message);
         searchInput.reportValidity();
     }
@@ -101,6 +153,7 @@ export default class Lookup extends LightningElement {
         this.searchKey = event.target.innerText;
         this.debug("selectedContactId", this.selectedContactId);
         this.contacts = [];
+        this.template.querySelector(".searchInput").focus();
     }
 
     setContactId(contactId) {
@@ -109,7 +162,7 @@ export default class Lookup extends LightningElement {
 
             let contact = {};
             if(this.contacts) {
-                contact = this.contacts.find(contact => contact.Id === contactId) || {};
+                contact = this.contacts.find(c => c.Id === contactId) || {};
             }
             const searchKeyword = this.selectedContactId ? contact.Name : "";
             const eventData = {"detail": { "contact": contact, "searchKey": searchKeyword }};
@@ -122,6 +175,15 @@ export default class Lookup extends LightningElement {
     get comboBoxClass() {
         let className = (this.contacts && this.contacts.length ? "slds-is-open" : "");
         return "slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click " + className;
+    }
+
+    get iconColor() {
+        let color = "background-color: " +
+            (this.themeInfo && this.themeInfo.color ?
+                ("#" + this.themeInfo.color) : "") +
+            ";";
+        this.debug("color", color);
+        return color;
     }
 
     get noRecordFound() {

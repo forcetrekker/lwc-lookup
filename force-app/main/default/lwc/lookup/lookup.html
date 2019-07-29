@@ -2,9 +2,14 @@
     <div class="slds-combobox_container">
         <div class={comboBoxClass} aria-expanded="false" aria-haspopup="listbox" role="combobox">
             <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
-                <lightning-input type="search" onchange={handleKeyChange} onblur={handleBlur}
-                    label={searchLabel} class="searchInput"
-                    value={searchKey} placeholder={placeholderLabel}></lightning-input>
+                <lightning-input type="search"
+                    onchange={handleKeyChange}
+                    onblur={handleBlur}
+                    label={searchLabel}
+                    class="searchInput"
+                    value={searchKey}
+                    placeholder={placeholderLabel}
+                    disabled={disabledInput}></lightning-input>
             </div>
             <template if:true={contacts} >
                 <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
@@ -13,6 +18,15 @@
                             <li role="presentation" class="slds-listbox__item" key={contact.Id}
                                 onclick={onResultClick} data-contact-id={contact.Id}>
                                 <div id={contact.Id} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                    <template if:true={themeInfo}>
+                                        <span class="slds-media__figure slds-listbox__option-icon slds-m-top_none">
+                                            <div style={iconColor}>
+                                                <span class="uiImage" data-aura-class="uiImage">
+                                                    <img src={themeInfo.iconUrl} class="icon " alt="Account" title="Account">
+                                                </span>
+                                            </div>
+                                        </span>
+                                    </template>
                                     <span class="slds-media__body">
                                         <span class="slds-listbox__option-text slds-listbox__option-text_entity">
                                             {contact.Name}
@@ -20,7 +34,6 @@
                                     </span>
                                 </div>
                             </li>
-
                         </template>
                     </ul>
                 </div>

@@ -9,10 +9,28 @@
     </targets>
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
+            <property name="cardTitle" type="String" label="Card Title"
+                description="Enter card title"
+                placeholder="Enter card title"
+                required="true"
+                default="Lookup Example"/>
             <property name="objectname" type="String" label="Object Name"
                 description="Enter object API name"
                 placeholder="Enter object API name"
                 required="true"/>
+            <property name="keyfieldapiname" type="String" label="Field Api Name"
+                description="Enter Field API name"
+                placeholder="Enter Field API name"
+                required="true"
+                default="Name"/>
+            <property name="autoselectsinglematchingrecord" type="Boolean" label="Auto select single matching record"
+                description="Auto select single matching record"/>
+            <property name="lookupLabel" type="String" label="Field Lookup label"
+                description="Field Lookup label"
+                placeholder="Field Lookup label"/>
+            <property name="invalidOptionChosenMessage" type="String" label="Invalid option chosen message"
+                description="Invalid option chosen message"
+                placeholder="Invalid option chosen message"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
