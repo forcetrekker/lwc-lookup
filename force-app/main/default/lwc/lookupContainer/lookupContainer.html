@@ -1,9 +1,10 @@
 <template>
     <lightning-card title={cardTitle}>
         <p class="slds-p-horizontal_small">
-            <c-lookup onselected={contactSelected}
+            <c-lookup onselected={recordSelected}
                 objectname={objectname}
                 keyfieldapiname={keyfieldapiname}
+                additional-field={additionalField}
                 autoselectsinglematchingrecord={autoselectsinglematchingrecord}
                 lookup-label={lookupLabel}
                 invalid-option-chosen-message={invalidOptionChosenMessage}></c-lookup>
@@ -11,8 +12,8 @@
         <template if:true={searchKey}>
             <div class="slds-p-horizontal_small slds-p-top_small">
                 You selected record with name {searchKey},
-                <template if:true={contact}>
-                    Id as {contact.Id}
+                <template if:true={record}>
+                    Id as {record.Id}
                 </template>
             </div>
         </template>

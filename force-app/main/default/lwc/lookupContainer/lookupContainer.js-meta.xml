@@ -8,7 +8,7 @@
         <target>lightning__HomePage</target>
     </targets>
     <targetConfigs>
-        <targetConfig targets="lightning__RecordPage">
+        <targetConfig targets="lightning__RecordPage,lightning__AppPage">
             <property name="cardTitle" type="String" label="Card Title"
                 description="Enter card title"
                 placeholder="Enter card title"
@@ -23,6 +23,9 @@
                 placeholder="Enter Field API name"
                 required="true"
                 default="Name"/>
+            <property name="additionalField" type="String" label="Additional field Name"
+                description="Enter Field API name"
+                placeholder="Enter Field API name"/>
             <property name="autoselectsinglematchingrecord" type="Boolean" label="Auto select single matching record"
                 description="Auto select single matching record"/>
             <property name="lookupLabel" type="String" label="Field Lookup label"
