@@ -11,13 +11,13 @@
                     placeholder={placeholderLabel}
                     disabled={disabledInput}></lightning-input>
             </div>
-            <template if:true={contacts} >
+            <template if:true={records} >
                 <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
                     <ul class="slds-listbox slds-listbox_vertical" role="presentation">
-                        <template for:each={contacts} for:item="contact">
-                            <li role="presentation" class="slds-listbox__item" key={contact.Id}
-                                onclick={onResultClick} data-contact-id={contact.Id}>
-                                <div id={contact.Id} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                        <template for:each={records} for:item="record">
+                            <li role="presentation" class="slds-listbox__item" key={record.Id}
+                                onclick={onResultClick} data-record-id={record.Id}>
+                                <div id={record.Id} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
                                     <template if:true={themeInfo}>
                                         <span class="slds-media__figure slds-listbox__option-icon slds-m-top_none">
                                             <div style={iconColor}>
@@ -29,8 +29,13 @@
                                     </template>
                                     <span class="slds-media__body">
                                         <span class="slds-listbox__option-text slds-listbox__option-text_entity">
-                                            {contact.Name}
+                                            {record.text}
                                         </span>
+                                        <template if:true={record.meta}>
+                                            <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
+                                                {record.meta}
+                                            </span>
+                                        </template>
                                     </span>
                                 </div>
                             </li>
