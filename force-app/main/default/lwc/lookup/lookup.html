@@ -43,6 +43,21 @@
                     </ul>
                 </div>
             </template>
+        
         </div>
+    </div>
+
+    <div>
+        <template if:true={displayMultipleOption}>
+            <ul class="slds-listbox slds-listbox_inline slds-p-top_xxx-small" role="group" 
+                aria-label="multiple selections">
+                <template for:each={items} for:item="item" for:index="index">
+                    <li role="presentation" class="slds-listbox__item" key={item.id}>
+                        <lightning-pill label={item.text} onremove={handleItemRemove}
+                            name={index}></lightning-pill>
+                    </li>
+                </template>
+            </ul>
+        </template>
     </div>
 </template>

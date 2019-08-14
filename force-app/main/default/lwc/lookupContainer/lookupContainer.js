@@ -8,6 +8,7 @@ export default class LookupContainer extends LightningElement {
     @api autoselectsinglematchingrecord;
     @api lookupLabel;
     @api invalidOptionChosenMessage;
+    @api isMultiSelect;
     @track record;
     @track searchKey;
     recordSelected(event) {

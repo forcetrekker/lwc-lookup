@@ -16,6 +16,7 @@ export default class Lookup extends LightningElement {
     @api lookupLabel;
     @api lookupPlaceholder;
     @api invalidOptionChosenMessage;
+    @api isMultiSelect;
 
     // reactive private properties
     @track searchKey = '';
@@ -26,6 +27,8 @@ export default class Lookup extends LightningElement {
     @track placeholderLabel = "Search";
     @track searchLabel;
     @track themeInfo;
+    @track items = [];
+
 
     @wire(getObjectInfo, { objectApiName: "$objectname" })
     handleResult({error, data}) {
@@ -110,6 +113,11 @@ export default class Lookup extends LightningElement {
                 if(!this.selectedRecordId && this.searchKey) {
                     this.records = [];
                 }
+
+                if(this.isMultiSelect) {
+                    this.searchKey = "";
+                    this.records = [];
+                }
                 this.debug("inside blur timeout", this.searchKey, this.selectedRecordId);
                 this.toggleError();
             }
@@ -163,7 +171,10 @@ export default class Lookup extends LightningElement {
 
     onResultClick(event) {
         this.setRecordId(event.currentTarget.dataset.recordId);
-        this.searchKey = event.target.innerText;
+        if(!this.isMultiSelect) {
+            // todo: do something about it, need to fix the text not meta
+            this.searchKey = event.target.innerText;
+        }
         this.debug("selectedRecordId", this.selectedRecordId);
         this.records = [];
         this.template.querySelector(".searchInput").focus();
@@ -177,6 +188,10 @@ export default class Lookup extends LightningElement {
             if(this.records) {
                 record = this.records.find(c => c.Id === recordId) || {};
             }
+            if(this.selectedRecordId && record) {
+                this.items.push(record);
+            }
+
             const searchKeyword = this.selectedRecordId ? record.text : "";
             const eventData = {"detail": { "record": record, "searchKey": searchKeyword }};
             const selectedEvent = new CustomEvent('selected', eventData);
@@ -207,9 +222,21 @@ export default class Lookup extends LightningElement {
         return this.selectedRecordId && this.searchKey;
     }
 
+    get displayMultipleOption() {
+        return this.isMultiSelect && this.items;
+    }
+
     debug(message) {
         if(this.debugmode === true) {
             console.log(message);
         }
+    }
+
+    handleItemRemove(event) {
+        const index = event.detail.index ? event.detail.index : event.detail.name;
+        const _item = this.items;
+        _item.splice(index, 1);
+        // shallow copy of the variable to track
+        this.items = [..._item];
     }
 }
