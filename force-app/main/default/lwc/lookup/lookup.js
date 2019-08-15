@@ -4,7 +4,6 @@ import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 
 /** The delay used when debouncing event handlers before invoking Apex. */
 const DELAY = 300;
-const debugmode = false;
 
 export default class Lookup extends LightningElement {
 
@@ -16,6 +15,7 @@ export default class Lookup extends LightningElement {
     @api lookupLabel;
     @api lookupPlaceholder;
     @api invalidOptionChosenMessage;
+    @api isMultiSelect;
 
     // reactive private properties
     @track searchKey = '';
@@ -26,6 +26,8 @@ export default class Lookup extends LightningElement {
     @track placeholderLabel = "Search";
     @track searchLabel;
     @track themeInfo;
+    @track items = [];
+
 
     @wire(getObjectInfo, { objectApiName: "$objectname" })
     handleResult({error, data}) {
@@ -41,7 +43,7 @@ export default class Lookup extends LightningElement {
             }
             this.searchLabel = this.lookupLabel || objectInformation.label;
             this.themeInfo = objectInformation.themeInfo || {};
-            this.debug("Labels retrieved..");
+            // console.log("Labels retrieved..");
 
             this.validateAttributes(objectInformation);
         }
@@ -91,7 +93,6 @@ export default class Lookup extends LightningElement {
     }
 
     handleBlur(event) {
-        this.debug("before event.target.value", event.target.value, this.selectedRecordId);
 
         // copy the reference of properties locally to make them available for timeout
         let searchKey = event.target.value;
@@ -99,6 +100,9 @@ export default class Lookup extends LightningElement {
         let records = this.records;
         // timeout is added to avoid showing error when user selects a result
         setTimeout(() => {
+
+            // console.log("before event.target.value", searchKey, selectedRecordId);
+
             if(this.searchKey) {
                 // when single records is available, select it
                 if(this.autoselectsinglematchingrecord && this.records && this.records.length === 1) {
@@ -110,22 +114,31 @@ export default class Lookup extends LightningElement {
                 if(!this.selectedRecordId && this.searchKey) {
                     this.records = [];
                 }
-                this.debug("inside blur timeout", this.searchKey, this.selectedRecordId);
+
+                if(this.isMultiSelect) {
+                    this.searchKey = "";
+                    this.records = [];
+                }
+                // console.log("inside blur timeout", this.searchKey, this.selectedRecordId);
                 this.toggleError();
             }
         }, 200);
     }
 
     queryRecords() {
-        this.debug("you typed: " + this.searchKey);
-        findRecords({ "searchKey": this.searchKey,
+        // console.log("you typed: " + this.searchKey);
+        var setSelectedRecords = this.isMultiSelect ? this.items.map((item) => item.Id) : [];
+        // console.log("setSelectedRecords", JSON.stringify(setSelectedRecords));
+        findRecords({ 
+            "searchKey": this.searchKey,
             "objectApiName": this.objectname,
             "keyField": this.keyfieldapiname,
-            "additionalField": this.additionalField} )
-            .then(result => {
+            "additionalField": this.additionalField,
+            "selectedRecords": JSON.stringify(setSelectedRecords) 
+        }).then(result => {
                 let keyfieldapiname = this.keyfieldapiname;
                 let additionalField = this.additionalField;
-                this.debug("this.keyfieldapiname", keyfieldapiname);
+                // console.log("this.keyfieldapiname", keyfieldapiname);
                 let records = [];
                 result.forEach(function(eachResult) {
 
@@ -140,7 +153,7 @@ export default class Lookup extends LightningElement {
                     records.push(record);
                 });
                 this.records = records;
-                this.debug("this.records", JSON.stringify(this.records));
+                // console.log("this.records", JSON.stringify(this.records));
 
                 this.toggleError();
             })
@@ -163,8 +176,21 @@ export default class Lookup extends LightningElement {
 
     onResultClick(event) {
         this.setRecordId(event.currentTarget.dataset.recordId);
-        this.searchKey = event.target.innerText;
-        this.debug("selectedRecordId", this.selectedRecordId);
+        if(!this.isMultiSelect) {
+            // todo: do something about it, need to fix the text not meta
+            
+            let searchKeyword = '';
+            if(this.selectedRecordId) {
+                let record = this.records.find(eachRecord => eachRecord.Id === this.selectedRecordId);
+                if(record && record.Id) {
+                    searchKeyword = record.text;
+                }
+
+            }
+            this.searchKey = searchKeyword;
+            
+        }
+        // console.log("selectedRecordId", this.selectedRecordId);
         this.records = [];
         this.template.querySelector(".searchInput").focus();
     }
@@ -177,10 +203,14 @@ export default class Lookup extends LightningElement {
             if(this.records) {
                 record = this.records.find(c => c.Id === recordId) || {};
             }
+            if(this.selectedRecordId && record) {
+                this.items.push(record);
+            }
+
             const searchKeyword = this.selectedRecordId ? record.text : "";
             const eventData = {"detail": { "record": record, "searchKey": searchKeyword }};
             const selectedEvent = new CustomEvent('selected', eventData);
-            this.debug("sending event", JSON.stringify(eventData));
+            // console.log("sending event", JSON.stringify(eventData));
             this.dispatchEvent(selectedEvent);
         }
     }
@@ -195,7 +225,7 @@ export default class Lookup extends LightningElement {
             (this.themeInfo && this.themeInfo.color ?
                 ("#" + this.themeInfo.color) : "") +
             ";";
-        this.debug("color", color);
+        // console.log("color", color);
         return color;
     }
 
@@ -207,9 +237,19 @@ export default class Lookup extends LightningElement {
         return this.selectedRecordId && this.searchKey;
     }
 
-    debug(message) {
-        if(this.debugmode === true) {
-            console.log(message);
-        }
+    get displayMultipleOption() {
+        return this.isMultiSelect && this.items;
+    }
+
+    handleItemRemove(event) {
+
+        // clear record selected message
+        this.setRecordId("");
+
+        const index = event.detail.index ? event.detail.index : event.detail.name;
+        const _item = this.items;
+        _item.splice(index, 1);
+        // shallow copy of the variable to track
+        this.items = [..._item];
     }
 }

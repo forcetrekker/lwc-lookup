@@ -1,7 +1,11 @@
 public with sharing class LookupController {
 
     @AuraEnabled(cacheable=true)
-    public static List<SObject> findRecords(String searchKey, String objectApiName, String keyField, String additionalField) {
+    public static List<SObject> findRecords(String searchKey, 
+        String objectApiName, 
+        String keyField, 
+        String additionalField,
+        String selectedRecords) {
 
         System.debug('searchKey: ' + searchKey);
         List<SObject> records =  new List<SObject>();
@@ -22,9 +26,17 @@ public with sharing class LookupController {
         fieldsList.addAll(fieldsSet);
         String fieldsString = String.join(fieldsList, ', ');
 
+        Set<Id> setSelectedRecords = (Set<Id>) JSON.deserialize(selectedRecords, Set<Id>.class);
+
         String key = '%' + searchKey + '%';
-        String soqlTemplate = 'SELECT {0} FROM {1} WHERE {2} LIKE \'\'{3}\'\' ORDER BY {2} LIMIT 10';
-        String soql = String.format(soqlTemplate, new List<String> {fieldsString, objectApiName, keyField, key});
+
+        String whereClause = 'WHERE ' + keyField + ' LIKE \''+ key +'\'';
+        if(!setSelectedRecords.isEmpty()) {
+            whereClause += ' AND Id Not IN: setSelectedRecords';
+        }
+
+        String soqlTemplate = 'SELECT {0} FROM {1} {2} ORDER BY {3} LIMIT 10';
+        String soql = String.format(soqlTemplate, new List<String> {fieldsString, objectApiName, whereClause, keyField});
         System.debug('soql: ' + soql);
         records = Database.query(soql);
         System.debug('records: ' + records);

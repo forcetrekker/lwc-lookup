@@ -29,11 +29,11 @@
                                     </template>
                                     <span class="slds-media__body">
                                         <span class="slds-listbox__option-text slds-listbox__option-text_entity">
-                                            {record.text}
+                                            <lightning-formatted-text value={record.text}></lightning-formatted-text>
                                         </span>
                                         <template if:true={record.meta}>
                                             <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
-                                                {record.meta}
+                                                <lightning-formatted-text value={record.meta}></lightning-formatted-text>
                                             </span>
                                         </template>
                                     </span>
@@ -43,6 +43,22 @@
                     </ul>
                 </div>
             </template>
+        
         </div>
+    </div>
+
+    <div>
+        <template if:true={displayMultipleOption}>
+            <ul class="slds-listbox slds-listbox_inline slds-p-top_xxx-small" role="group" 
+                aria-label="multiple selections">
+                <template for:each={items} for:item="item" for:index="index">
+                    <li role="presentation" class="slds-listbox__item" key={item.Id}>
+                        <lightning-pill label={item.text} onremove={handleItemRemove}
+                            name={index}>
+                        </lightning-pill>
+                    </li>
+                </template>
+            </ul>
+        </template>
     </div>
 </template>

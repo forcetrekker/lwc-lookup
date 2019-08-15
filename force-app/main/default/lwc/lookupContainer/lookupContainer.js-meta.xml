@@ -8,7 +8,7 @@
         <target>lightning__HomePage</target>
     </targets>
     <targetConfigs>
-        <targetConfig targets="lightning__RecordPage,lightning__AppPage">
+        <targetConfig targets="lightning__RecordPage, lightning__AppPage">
             <property name="cardTitle" type="String" label="Card Title"
                 description="Enter card title"
                 placeholder="Enter card title"
@@ -34,6 +34,8 @@
             <property name="invalidOptionChosenMessage" type="String" label="Invalid option chosen message"
                 description="Invalid option chosen message"
                 placeholder="Invalid option chosen message"/>
+            <property name="isMultiSelect" type="Boolean" label="Is multi select"
+                description="Enables multiple select"/>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>
