@@ -1,6 +1,21 @@
 public with sharing class LookupController {
 
     @AuraEnabled(cacheable=true)
+    public static ObjectSchemaWrapper findObjectSchema(String objectApiName, String keyField) {
+        
+        ObjectSchemaWrapper schemaWrapper = new ObjectSchemaWrapper();
+        List<ObjectWrapper> objectWrapperList = new List<ObjectWrapper> {
+            new ObjectWrapper('Contact', 'Contact'),
+            new ObjectWrapper('Lead', 'Lead')
+        };
+        schemaWrapper.objectList = objectWrapperList;
+
+        System.debug('schemaWrapper: ' + schemaWrapper);
+
+        return schemaWrapper; 
+    }
+
+    @AuraEnabled(cacheable=true)
     public static List<SObject> findRecords(String searchKey, 
         String objectApiName, 
         String keyField, 
@@ -41,5 +56,17 @@ public with sharing class LookupController {
         records = Database.query(soql);
         System.debug('records: ' + records);
         return records;
+    }
+
+    public class ObjectSchemaWrapper {
+        @AuraEnabled public List<ObjectWrapper> objectList {get; set; }
+    }
+    public class ObjectWrapper {
+        @AuraEnabled public String key { get; set; }
+        @AuraEnabled public String label { get; set; }
+        public ObjectWrapper(String key, String label) {
+            this.key = key;
+            this.label = label;
+        }
     }
 }

@@ -1,9 +1,11 @@
 import { LightningElement, track, api, wire } from 'lwc';
 import findRecords from '@salesforce/apex/LookupController.findRecords';
+import findObjectSchema from '@salesforce/apex/LookupController.findObjectSchema';
 import { getObjectInfo } from 'lightning/uiObjectInfoApi';
 
 /** The delay used when debouncing event handlers before invoking Apex. */
 const DELAY = 300;
+let isRunOnce = false;
 
 export default class Lookup extends LightningElement {
 
@@ -48,9 +50,41 @@ export default class Lookup extends LightningElement {
             this.validateAttributes(objectInformation);
         }
         if(error) {
-            this.showError("You do not have the rights to object or object api name is invalid: " + this.objectname);
-            this.disabledInput = true;
+
+            let message = "You do not have the rights to object or object api name is invalid: " + this.objectname;
+            if(error.statusText === "INVALID_TYPE" && !isRunOnce) {
+                this.isRunOnce = true;
+                // this.objectname = 'Contact';
+                // this.keyfieldapiname = 'Name';
+                this.callFindObjectSchema();
+            } else {
+                this.showError(error.body && error.body.length > 0 ? error.body[0].message : message);
+                this.disabledInput = true;
+            }
         }
+    }
+
+    callFindObjectSchema() {
+        findObjectSchema({ 
+            "objectApiName": this.objectname,
+            "keyField": this.keyfieldapiname
+        }).then(result => {
+            let objectname = this.objectname;
+            let keyfieldapiname = this.keyfieldapiname;
+
+            if(result && result.objectList && result.objectList.length > 0) {
+                this.objectname = result.objectList[0].key;
+                this.keyfieldapiname = 'Name';
+            } else {
+                this.error = 'Some error occured'; 
+            }
+            
+            console.log("result", JSON.stringify(result));
+
+        })
+        .catch(error => {
+            this.error = error;
+        });
     }
 
     // validate the name and additional fields
@@ -136,30 +170,30 @@ export default class Lookup extends LightningElement {
             "additionalField": this.additionalField,
             "selectedRecords": JSON.stringify(setSelectedRecords) 
         }).then(result => {
-                let keyfieldapiname = this.keyfieldapiname;
-                let additionalField = this.additionalField;
-                // console.log("this.keyfieldapiname", keyfieldapiname);
-                let records = [];
-                result.forEach(function(eachResult) {
+            let keyfieldapiname = this.keyfieldapiname;
+            let additionalField = this.additionalField;
+            // console.log("this.keyfieldapiname", keyfieldapiname);
+            let records = [];
+            result.forEach(function(eachResult) {
 
-                    // prepare the JSON data
-                    let record = {
-                        "Id": eachResult.Id,
-                        "text": eachResult[keyfieldapiname]
-                    };
-                    if(additionalField) {
-                        record.meta = eachResult[additionalField];
-                    }
-                    records.push(record);
-                });
-                this.records = records;
-                // console.log("this.records", JSON.stringify(this.records));
-
-                this.toggleError();
-            })
-            .catch(error => {
-                this.error = error;
+                // prepare the JSON data
+                let record = {
+                    "Id": eachResult.Id,
+                    "text": eachResult[keyfieldapiname]
+                };
+                if(additionalField) {
+                    record.meta = eachResult[additionalField];
+                }
+                records.push(record);
             });
+            this.records = records;
+            // console.log("this.records", JSON.stringify(this.records));
+
+            this.toggleError();
+        })
+        .catch(error => {
+            this.error = error;
+        });
     }
 
     toggleError() {

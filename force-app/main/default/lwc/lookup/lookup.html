@@ -1,64 +1,115 @@
 <template>
-    <div class="slds-combobox_container">
-        <div class={comboBoxClass} aria-expanded="false" aria-haspopup="listbox" role="combobox">
-            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
-                <lightning-input type="search"
-                    onchange={handleKeyChange}
-                    onblur={handleBlur}
-                    label={searchLabel}
-                    class="searchInput"
-                    value={searchKey}
-                    placeholder={placeholderLabel}
-                    disabled={disabledInput}></lightning-input>
-            </div>
-            <template if:true={records} >
-                <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
-                    <ul class="slds-listbox slds-listbox_vertical" role="presentation">
-                        <template for:each={records} for:item="record">
-                            <li role="presentation" class="slds-listbox__item" key={record.Id}
-                                onclick={onResultClick} data-record-id={record.Id}>
-                                <div id={record.Id} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
-                                    <template if:true={themeInfo}>
-                                        <span class="slds-media__figure slds-listbox__option-icon slds-m-top_none">
-                                            <div style={iconColor}>
-                                                <span class="uiImage" data-aura-class="uiImage">
-                                                    <img src={themeInfo.iconUrl} class="icon " alt="Account" title="Account">
+
+    <div class="slds-form-element">
+        <label class="slds-form-element__label" for="combobox-id-2">{searchLabel}</label>
+        <div class="slds-form-element__control">
+            
+            <div class="slds-combobox-group">
+
+                <div class="slds-combobox_object-switcher slds-combobox-addon_start">
+                    <div class="slds-form-element">
+                        <label class="slds-form-element__label slds-assistive-text" for="combobox-id-1">
+                            Filter Search by:
+                        </label>
+                        <div class="slds-form-element__control">
+                        <div class="slds-combobox_container">
+                            <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click" 
+                                aria-controls="primary-combobox-id-1" aria-expanded="false" aria-haspopup="listbox" 
+                                role="combobox">
+                            <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                                <select class="slds-select" id="select-01">
+                                    <option>Leads</option>
+                                    <option>Contacts</option>
+                                </select>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="slds-combobox_container">
+                    <div class={comboBoxClass} aria-expanded="false" aria-haspopup="listbox" role="combobox">
+                        <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_left" role="none">
+
+                            <input class="slds-input slds-combobox__input" id="combobox-id-2" aria-autocomplete="list" aria-controls="listbox-id-1" role="textbox" 
+                            type="search"
+                            onchange={handleKeyChange}
+                            onblur={handleBlur}
+                            placeholder={placeholderLabel} 
+                            value={searchKey}
+                            disabled={disabledInput}/>
+                            
+                            <lightning-icon icon-name="utility:search" size="x-small" alternative-text="Search icon"
+                            class="slds-input__icon slds-input__icon_left"></lightning-icon>
+
+                            <!-- <span class="slds-icon_container slds-icon-utility-search slds-input__icon slds-input__icon_right" 
+                                title="Utility search">
+                                
+                            </span> -->
+
+
+                            <!-- <lightning-input type="search"
+                                onchange={handleKeyChange}
+                                onblur={handleBlur}
+                                class="searchInput"
+                                value={searchKey}
+                                placeholder={placeholderLabel}
+                                disabled={disabledInput}></lightning-input> -->
+                        </div>
+                        <template if:true={records} >
+                            <div id="listbox-id-1" class="slds-dropdown slds-dropdown_length-with-icon-7 slds-dropdown_fluid" role="listbox">
+                                <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                    <template for:each={records} for:item="record">
+                                        <li role="presentation" class="slds-listbox__item" key={record.Id}
+                                            onclick={onResultClick} data-record-id={record.Id}>
+                                            <div id={record.Id} class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta" role="option">
+                                                <template if:true={themeInfo}>
+                                                    <span class="slds-media__figure slds-listbox__option-icon slds-m-top_none">
+                                                        <div style={iconColor}>
+                                                            <span class="uiImage" data-aura-class="uiImage">
+                                                                <img src={themeInfo.iconUrl} class="icon " alt="Account" title="Account">
+                                                            </span>
+                                                        </div>
+                                                    </span>
+                                                </template>
+                                                <span class="slds-media__body">
+                                                    <span class="slds-listbox__option-text slds-listbox__option-text_entity">
+                                                        <lightning-formatted-text value={record.text}></lightning-formatted-text>
+                                                    </span>
+                                                    <template if:true={record.meta}>
+                                                        <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
+                                                            <lightning-formatted-text value={record.meta}></lightning-formatted-text>
+                                                        </span>
+                                                    </template>
                                                 </span>
                                             </div>
-                                        </span>
+                                        </li>
                                     </template>
-                                    <span class="slds-media__body">
-                                        <span class="slds-listbox__option-text slds-listbox__option-text_entity">
-                                            <lightning-formatted-text value={record.text}></lightning-formatted-text>
-                                        </span>
-                                        <template if:true={record.meta}>
-                                            <span class="slds-listbox__option-meta slds-listbox__option-meta_entity">
-                                                <lightning-formatted-text value={record.meta}></lightning-formatted-text>
-                                            </span>
-                                        </template>
-                                    </span>
-                                </div>
-                            </li>
+                                </ul>
+                            </div>
                         </template>
-                    </ul>
+                    
+                    </div>
                 </div>
-            </template>
-        
-        </div>
-    </div>
 
-    <div>
-        <template if:true={displayMultipleOption}>
-            <ul class="slds-listbox slds-listbox_inline slds-p-top_xxx-small" role="group" 
-                aria-label="multiple selections">
-                <template for:each={items} for:item="item" for:index="index">
-                    <li role="presentation" class="slds-listbox__item" key={item.Id}>
-                        <lightning-pill label={item.text} onremove={handleItemRemove}
-                            name={index}>
-                        </lightning-pill>
-                    </li>
-                </template>
-            </ul>
-        </template>
+                <div>
+                    <template if:true={displayMultipleOption}>
+                        <ul class="slds-listbox slds-listbox_inline slds-p-top_xxx-small" role="group" 
+                            aria-label="multiple selections">
+                            <template for:each={items} for:item="item" for:index="index">
+                                <li role="presentation" class="slds-listbox__item" key={item.Id}>
+                                    <lightning-pill label={item.text} onremove={handleItemRemove}
+                                        name={index}>
+                                    </lightning-pill>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+
+            </div>
+        </div>
     </div>
 </template>
